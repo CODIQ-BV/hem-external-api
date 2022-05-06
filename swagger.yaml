@@ -1,435 +1,276 @@
 openapi: 3.0.0
+x-stoplight:
+  id: mr4cwcjuzm7fu
 info:
-  title: awesems
+  title: hem-external
   version: '1.0'
-  description: ''
 servers:
-  - url: 'https://stoplight.io/mocks/codiq/awesems/22186902'
-    description: Mock
-  - url: 'https://api.awesems-energy.nl/v1/awesems'
-    description: Production
-  - url: 'https://staging-api.awesems-energy.nl/v1/awesems'
-    description: Staging
+  - url: 'https://api.hem.nl/v1'
 paths:
-  '/customer/{externalID}/usage':
-    get:
-      summary: Get usage for period
-      tags:
-        - usage
+  /external/order:
+    post:
+      summary: Send Order (External)
+      operationId: post-user
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    homeUsage:
-                      type: object
-                      properties:
-                        usageHigh:
-                          type: integer
-                        usageLow:
-                          type: integer
-                        usageSingle:
-                          type: integer
-                        meterType:
-                          type: string
-                          enum:
-                            - SINGLE
-                            - DOUBLE
-                        returnHigh:
-                          type: integer
-                        returnLow:
-                          type: integer
-                        returnSingle:
-                          type: integer
-                        gasUsage:
-                          type: integer
-                    chargingPointUsage:
-                      type: object
-                      properties:
-                        usageHigh:
-                          type: integer
-                        usageLow:
-                          type: integer
-                        usageSingle:
-                          type: integer
-                        meterType:
-                          type: string
-                          enum:
-                            - SINGLE
-                            - DOUBLE
-                        returnHigh:
-                          type: integer
-                        returnLow:
-                          type: integer
-                        returnSingle:
-                          type: integer
-                    period:
-                      type: object
-                      properties:
-                        from:
-                          type: string
-                          example: '2021-01-01 12:00:00'
-                        to:
-                          type: string
-                          example: '2021-01-01 13:00:00'
-        '406':
-          description: Not Acceptable
-          content:
-            application/json:
-              schema:
-                type: object
-      operationId: get-usage
-      parameters:
-        - schema:
-            type: string
-            example: Year OR Year-Month OR Year-Month-Day
-          in: query
-          name: period
-          required: true
-    parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: externalID
-        in: path
-        required: true
-        description: (Awesems ID)
-  '/customer/{externalID}':
-    get:
-      summary: Get customer / check existence
-      tags:
-        - customer
-      responses:
-        '200':
-          description: OK
-          headers: {}
+        '201':
+          description: Order Created
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  relation:
-                    $ref: '#/components/schemas/Relation'
-                  hasActiveContract:
+                  success:
                     type: boolean
-                    description: True when this relation has an active contract
-                  hasSplitBilling:
-                    type: boolean
-        '404':
-          description: Not Found
-      operationId: get-customer
-    parameters:
-      - schema:
-          type: string
-          format: uuid
-        name: externalID
-        in: path
-        required: true
-        description: (Awesems ID)
-    patch:
-      summary: Edit customer
-      operationId: patch-customer-externalID
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  denyReason:
-                    type: string
-                    example: Split-billing for this customer is not allowed
-      description: For now only to edit the payment preference (split billing yes or no)
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                hasSplitBilling:
-                  type: boolean
-      tags:
-        - customer
-  '/customer/{externalID}/advancepayment':
-    parameters:
-      - schema:
-          type: string
-        name: externalID
-        in: path
-        required: true
-    get:
-      summary: Get current advance payment
-      tags:
-        - advancepayment
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  amount:
-                    type: number
-      operationId: get-customer-externalID-voorschot
-    patch:
-      summary: Edit advance payment
-      operationId: patch-customer-externalID-advancepayment
-      responses:
-        '202':
-          description: Accepted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  amount:
-                    type: number
-        '406':
-          description: Not Acceptable
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  denyReason:
-                    type: string
-                    example: Amount too high
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                amount:
-                  type: number
-      tags:
-        - advancepayment
-  '/customer/{externalID}/invoices':
-    get:
-      summary: Get invoices
-      tags:
-        - invoices
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      minimum: 1
-                    subAmount:
-                      type: number
-                    vatAmount:
-                      type: number
-                    totalAmount:
-                      type: number
-                    invoiceDate:
-                      type: string
-                      format: date
-                    status:
-                      type: string
-                      description: We cannot provide a payment status yet
-                    type:
-                      type: string
-                    fileURL:
-                      type: string
-                    typeLocalized:
-                      type: string
               examples: {}
-      operationId: get-customer-externalID-invoices
-      parameters:
-        - schema:
-            type: string
-          in: query
-          name: dateFrom
-        - schema:
-            type: string
-          in: query
-          name: dateTill
-      description: ''
-    parameters:
-      - schema:
-          type: string
-        name: externalID
-        in: path
-        required: true
-  /smartcharginghours:
-    get:
-      summary: Get smart charging hours
-      tags:
-        - smartcharging
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    hourFrom:
-                      type: integer
-                    hourTo:
-                      type: integer
-                    price:
-                      type: number
-      operationId: get-smartcharginghours
+        '422':
+          description: Missing Required Information
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              x-examples:
+                example-1:
+                  saleID: '258224135'
+                  signTimestamp: '03-05-2022 17:32:03'
+                  signIP: 84.241.201.243
+                  createTimestamp: '03-05-2022 17:32:03'
+                  signType: SIGNATURE
+                  signature: ''
+                  productID: '17'
+                  firstName: E. H. W.
+                  lastName: Verblaauw
+                  isBusiness: Nee
+                  companyName: ''
+                  contactPerson: ''
+                  cocNumber: ''
+                  vatNumber: ''
+                  gender: MALE
+                  postalCode: 1015 ZH
+                  houseNumber: '91'
+                  houseNumberAddition: Hl
+                  street: Marnixkade
+                  city: AMSTERDAM
+                  connectionPostalcode: 1015 ZH
+                  connectionHousenumber: '91'
+                  connectionHousenumberAddition: Hl
+                  connectionStreet: Marnixkade
+                  connectionCity: Amsterdam
+                  birthDate: 19-07-1993
+                  email: edgarverblaauw@live.nl
+                  phone: '0646352022'
+                  ibanNumber: NL60RABO0151803781
+                  ibanName: E. H. W. Verblaauw
+                  paymentMethod: AUTOMATIC_COLLECTION
+                  isDoubleMeter: '1'
+                  electricityUsageSingle: ''
+                  electricityUsagePeak: '750'
+                  electricityUsageOffPeak: '750'
+                  gasUsage: '1000'
+                  hasReturn: '0'
+                  returnSingle: ''
+                  returnHigh: ''
+                  returnLow: ''
+                  isResidential: '1'
+                  eanNumberElectricity: ''
+                  eanNumberGas: ''
+                  startDate: 03/06/2022
+                  profileElectricity: ''
+                  profileGas: ''
+                  energyType: DUAL
+                  bagPurpose: ''
+                  isMoveIn: '0'
+                  currentSupplier: ''
+                  status: FINISHED
+                  localID: 1509
+                  fetchTimestamp: null
+                  errorMessage: null
+                  externalParty: null
+              description: Needs to be unique!
+              properties:
+                saleID:
+                  type: string
+                signTimestamp:
+                  type: string
+                signIP:
+                  type: string
+                createTimestamp:
+                  type: string
+                signType:
+                  type: string
+                signature:
+                  type: string
+                productID:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                isBusiness:
+                  type: boolean
+                companyName:
+                  type: string
+                contactPerson:
+                  type: string
+                cocNumber:
+                  type: string
+                vatNumber:
+                  type: string
+                gender:
+                  type: string
+                  enum:
+                    - MALE
+                    - FEMALE
+                postalCode:
+                  type: string
+                houseNumber:
+                  type: string
+                houseNumberAddition:
+                  type: string
+                street:
+                  type: string
+                city:
+                  type: string
+                connectionPostalcode:
+                  type: string
+                connectionHousenumber:
+                  type: string
+                connectionHousenumberAddition:
+                  type: string
+                connectionStreet:
+                  type: string
+                connectionCity:
+                  type: string
+                birthDate:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                  description: Telefoonnummer moet beginnen met een 0
+                ibanNumber:
+                  type: string
+                ibanName:
+                  type: string
+                paymentMethod:
+                  type: string
+                  enum:
+                    - AUTOMATIC_COLLECTION
+                isDoubleMeter:
+                  type: boolean
+                electricityUsageSingle:
+                  type: string
+                  description: Verplicht indien energyType = DUAL of ELECTRICITY isDoubleMeter = false
+                electricityUsagePeak:
+                  type: string
+                  description: Verplicht indien energyType = DUAL of ELECTRICITY isDoubleMeter = true
+                electricityUsageOffPeak:
+                  type: string
+                  description: Verplicht indien energyType = DUAL of ELECTRICITY isDoubleMeter = true
+                gasUsage:
+                  type: string
+                  description: Verplicht indien energyType = DUAL of GAS
+                hasReturn:
+                  type: boolean
+                returnSingle:
+                  type: string
+                  description: Verplicht indien hasReturn = true en isDoubleMeter = false
+                returnHigh:
+                  type: string
+                  description: Verplicht indien hasReturn = true en isDoubleMeter = true
+                returnLow:
+                  type: string
+                  description: Verplicht indien hasReturn = true en isDoubleMeter = true
+                isResidential:
+                  type: boolean
+                eanNumberElectricity:
+                  type: string
+                  description: Niet verplicht
+                eanNumberGas:
+                  type: string
+                  description: Niet verplicht
+                startDate:
+                  type: string
+                profileElectricity:
+                  type: string
+                  description: Niet verplicht
+                profileGas:
+                  type: string
+                  description: Niet verplicht
+                energyType:
+                  type: string
+                  enum:
+                    - ELECTRICITY
+                    - DUAL
+                    - GAS
+                bagPurpose:
+                  type: string
+                isMoveIn:
+                  type: boolean
+                currentSupplier:
+                  type: string
+            examples:
+              Voorbeeld:
+                value:
+                  saleID: '3123123123'
+                  signTimestamp: '20-04-2022 16:59:36'
+                  signIP: 10.39.77.250
+                  createTimestamp: '20-04-2022 16:59:36'
+                  signType: SIGNATURE
+                  signature: ''
+                  productID: '17'
+                  firstName: X.
+                  lastName: XXXXX
+                  isBusiness: false
+                  companyName: ''
+                  contactPerson: ''
+                  cocNumber: ''
+                  vatNumber: ''
+                  gender: MALE
+                  postalCode: 5911 EV
+                  houseNumber: '24'
+                  houseNumberAddition: ''
+                  street: Puteanusstraat
+                  city: VENLO
+                  connectionPostalcode: 5911 EV
+                  connectionHousenumber: '24'
+                  connectionHousenumberAddition: ''
+                  connectionStreet: Puteanusstraat
+                  connectionCity: Venlo
+                  birthDate: 01-05-1990
+                  email: XXX@hotmail.com
+                  phone: '06123456678'
+                  ibanNumber: NL03XXXB0686825829
+                  ibanName: X. XXXXXX
+                  paymentMethod: AUTOMATIC_COLLECTION
+                  isDoubleMeter: false
+                  electricityUsageSingle: '1500'
+                  electricityUsagePeak: ''
+                  electricityUsageOffPeak: ''
+                  gasUsage: '1000'
+                  hasReturn: false
+                  returnSingle: ''
+                  returnHigh: ''
+                  returnLow: ''
+                  isResidential: '1'
+                  eanNumberElectricity: ''
+                  eanNumberGas: ''
+                  startDate: 22/04/2022
+                  profileElectricity: ''
+                  profileGas: ''
+                  energyType: DUAL
+                  bagPurpose: ''
+                  isMoveIn: '1'
+                  currentSupplier: ''
+        description: 'Note: Datums/Timestamps mogen in elk formaat aangeleverd worden'
+      description: Create a new order
+    parameters: []
 components:
-  schemas:
-    Relation:
-      description: ''
-      type: object
-      x-examples:
-        example-1:
-          id: 1
-          ecedoUUID: 2eea09fd-5558-4b72-aef4-adba010ad981
-          type: 1
-          gender: m
-          firstName: Zain
-          middleName: 'NULL'
-          lastName: Bouziane
-          birthDate: '2001-04-25'
-          phoneNumber: '0618582503'
-          mobileNumber: '0618582503'
-          email: zain@codiq.nl
-          companyName: 'NULL'
-          companyCocNumber: 'NULL'
-          street: Sandelingstraat
-          houseNumber: 56
-          houseNumberAddition: 'NULL'
-          postalCode: 3073AS
-          city: Rotterdam
-          paymentMethod: AUTOMATICCOLLECTION
-          debtorName: Zain Bouziane
-          bankAccountType: Bank
-          bankAccountNumber: NL37RABO7123425928
-          mandateTimestamp: '2021-10-07 11:08:25'
-      title: Relation
-      x-tags:
-        - relations
-      properties:
-        id:
-          type: integer
-          minimum: 1
-        externalID:
-          type: string
-          minLength: 1
-          format: uuid
-        type:
-          type: number
-        gender:
-          type: string
-          minLength: 1
-          enum:
-            - m
-            - f
-        firstName:
-          type: string
-          minLength: 1
-        middleName:
-          type: string
-          minLength: 1
-        lastName:
-          type: string
-          minLength: 1
-        birthDate:
-          type: string
-          minLength: 1
-        phoneNumber:
-          type: string
-          minLength: 1
-        mobileNumber:
-          type: string
-          minLength: 1
-        email:
-          type: string
-          minLength: 1
-        companyName:
-          type: string
-          minLength: 1
-        companyCocNumber:
-          type: string
-          minLength: 1
-        street:
-          type: string
-          minLength: 1
-        houseNumber:
-          type: integer
-        houseNumberAddition:
-          type: string
-          minLength: 1
-        postalCode:
-          type: string
-          minLength: 1
-        city:
-          type: string
-          minLength: 1
-        paymentMethod:
-          type: string
-          minLength: 1
-        debtorName:
-          type: string
-          minLength: 1
-        bankAccountType:
-          type: string
-          minLength: 1
-          enum:
-            - IBAN
-        bankAccountNumber:
-          type: string
-          minLength: 1
-        mandateTimestamp:
-          type: string
-          minLength: 1
-          readOnly: true
-      required:
-        - id
-        - externalID
-        - type
-        - gender
-        - firstName
-        - middleName
-        - lastName
-        - birthDate
-        - phoneNumber
-        - mobileNumber
-        - email
-        - companyName
-        - companyCocNumber
-        - street
-        - houseNumber
-        - houseNumberAddition
-        - postalCode
-        - city
-        - paymentMethod
-        - debtorName
-        - bankAccountType
-        - bankAccountNumber
-        - mandateTimestamp
+  schemas: {}
   securitySchemes:
-    API Key:
+    API Key - 1:
       name: X-Api-Key
       type: apiKey
       in: header
-tags:
-  - name: advancepayment
-  - name: customer
-  - name: invoices
-  - name: usage
 security:
   - API Key - 1: []
