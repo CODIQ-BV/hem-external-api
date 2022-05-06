@@ -21,7 +21,10 @@ paths:
                 properties:
                   success:
                     type: boolean
-              examples: {}
+              examples:
+                example-1:
+                  value:
+                    success: true
         '422':
           description: Missing Required Information
       requestBody:
@@ -268,9 +271,9 @@ paths:
 components:
   schemas: {}
   securitySchemes:
-    API Key - 1:
+    APIKey:
       name: X-Api-Key
       type: apiKey
       in: header
 security:
-  - API Key - 1: []
+  - APIKey: []
